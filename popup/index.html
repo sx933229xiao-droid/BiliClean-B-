@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BiliClean</title>
+    <link rel="stylesheet" href="index.css">
+  </head>
+  <body>
+    <main class="popup-shell">
+      <header class="brand-row">
+        <div class="brand">
+          <img src="../icons/icon-48.png" width="38" height="38" alt="">
+          <div>
+            <h1>BiliClean</h1>
+            <p>哔哩净屏 · 本地内容净化</p>
+          </div>
+        </div>
+        <label class="switch" aria-label="扩展总开关">
+          <input id="master-toggle" type="checkbox">
+          <span aria-hidden="true"></span>
+        </label>
+      </header>
+
+      <section id="status-card" class="status-card" aria-live="polite">
+        <div class="status-line">
+          <span id="status-dot" class="status-dot"></span>
+          <strong id="status-title">正在读取页面状态</strong>
+        </div>
+        <p id="status-detail">请稍候…</p>
+      </section>
+
+      <section class="panel">
+        <label for="mode-select">净化模式</label>
+        <select id="mode-select">
+          <option value="light">轻度</option>
+          <option value="standard">标准</option>
+          <option value="strict">严格</option>
+          <option value="custom">自定义</option>
+        </select>
+        <div class="module-grid">
+          <label><input id="comments-toggle" type="checkbox"> 评论</label>
+          <label><input id="videos-toggle" type="checkbox"> 视频卡片</label>
+          <label><input id="danmaku-toggle" type="checkbox"> 默认关闭弹幕</label>
+        </div>
+        <div class="quick-rule">
+          <label>
+            <input id="low-like-toggle" type="checkbox">
+            直接过滤低点赞评论
+          </label>
+          <label for="low-like-threshold">
+            点赞数 ≤
+            <input id="low-like-threshold" type="number" min="0" max="1000000">
+          </label>
+          <small>只处理发布超过宽限期的评论；开启后无需与其他风险信号组合。</small>
+        </div>
+      </section>
+
+      <section class="stats" aria-label="当前页面净化统计">
+        <div><strong id="comment-count">0</strong><span>评论</span></div>
+        <div><strong id="video-count">0</strong><span>视频</span></div>
+        <div><strong id="danmaku-state">—</strong><span>弹幕</span></div>
+      </section>
+
+      <div class="action-grid">
+        <button id="show-all-button" type="button" class="button secondary">恢复本页内容</button>
+        <button id="rescan-button" type="button" class="button secondary">重新扫描</button>
+      </div>
+
+      <section class="pause-row">
+        <span>临时暂停</span>
+        <button type="button" data-pause-minutes="10">10 分钟</button>
+        <button type="button" data-pause-minutes="60">1 小时</button>
+        <button id="resume-button" type="button">立即恢复</button>
+      </section>
+
+      <footer>
+        <button id="options-button" type="button" class="text-button">打开完整设置</button>
+        <span>v0.1.4</span>
+      </footer>
+    </main>
+    <script src="index.js"></script>
+  </body>
+</html>

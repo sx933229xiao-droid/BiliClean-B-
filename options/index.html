@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BiliClean 设置</title>
+    <link rel="stylesheet" href="index.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <img src="../icons/icon-48.png" width="42" height="42" alt="">
+        <div>
+          <h1>BiliClean 设置</h1>
+          <p>哔哩净屏 v0.1.4 · 本地优先</p>
+        </div>
+      </div>
+      <span id="save-status" class="save-status" role="status" aria-live="polite">正在载入…</span>
+    </header>
+
+    <div class="layout">
+      <nav aria-label="设置导航">
+        <a href="#overview">总览</a>
+        <a href="#comments">评论过滤</a>
+        <a href="#videos">视频与弹幕</a>
+        <a href="#rules">关键词规则</a>
+        <a href="#lists">用户名单</a>
+        <a href="#data">数据与隐私</a>
+      </nav>
+
+      <main>
+        <section id="overview" class="settings-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">基础设置</p>
+              <h2>总览</h2>
+              <p>关闭总开关后，本页所有扩展样式与监听器都会撤销。</p>
+            </div>
+          </div>
+          <div class="card control-list">
+            <label class="control-row">
+              <span><strong>扩展总开关</strong><small>只在 bilibili.com 页面运行</small></span>
+              <input id="enabled" type="checkbox">
+            </label>
+            <label class="field-row">
+              <span><strong>净化模式</strong><small>自定义模式使用下方类别开关</small></span>
+              <select id="mode">
+                <option value="light">轻度</option>
+                <option value="standard">标准</option>
+                <option value="strict">严格</option>
+                <option value="custom">自定义</option>
+              </select>
+            </label>
+            <fieldset class="module-fieldset">
+              <legend>启用模块</legend>
+              <label><input id="module-comments" type="checkbox"> 评论过滤</label>
+              <label><input id="module-videos" type="checkbox"> 视频卡片过滤</label>
+              <label><input id="module-danmaku" type="checkbox"> 弹幕控制</label>
+            </fieldset>
+          </div>
+          <div class="card lifetime-stats" aria-label="累计净化统计">
+            <div class="stats-heading">
+              <div>
+                <h3>累计净化统计</h3>
+                <p>只记录数量，不保存评论正文、视频标题或访问记录。</p>
+              </div>
+              <button id="reset-stats" type="button" class="secondary-button">清零统计</button>
+            </div>
+            <div class="stats-grid">
+              <div>
+                <strong id="stats-comments">0</strong>
+                <span>已屏蔽评论</span>
+              </div>
+              <div>
+                <strong id="stats-videos">0</strong>
+                <span>已屏蔽视频</span>
+              </div>
+            </div>
+            <p id="stats-since" class="stats-since">统计尚未开始</p>
+          </div>
+        </section>
+
+        <section id="comments" class="settings-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">本地规则</p>
+              <h2>评论过滤</h2>
+              <p>视频页先聚合首批最多 50 条评论统一判定；命中内容直接隐藏，不插入提示占位。</p>
+            </div>
+          </div>
+          <div class="two-column">
+            <div class="card control-list">
+              <h3>处理行为</h3>
+              <p class="muted-copy">评论区内不显示“已过滤”、触发原因或“查看一次”。需要检查误伤时，可从扩展弹窗恢复本页内容。</p>
+              <label class="control-row">
+                <span><strong>屏蔽含 @ 的互动评论</strong><small>必须同时达到下方字数与点赞条件才保留</small></span>
+                <input id="at-mention-enabled" type="checkbox">
+              </label>
+              <label class="field-row">
+                <span>保留时字数必须大于</span>
+                <input id="at-mention-text-length" type="number" min="0" max="10000">
+              </label>
+              <label class="field-row">
+                <span>保留时点赞必须大于</span>
+                <input id="at-mention-like-count" type="number" min="0" max="100000000">
+              </label>
+              <label class="control-row">
+                <span><strong>弱信号必须组合</strong><small>开启时，低点赞/低等级只与低质量或风险内容联合触发</small></span>
+                <input id="combine-weak" type="checkbox">
+              </label>
+            </div>
+
+            <div class="card control-list">
+              <h3>点赞与等级</h3>
+              <label class="control-row">
+                <span><strong>启用低点赞信号</strong></span>
+                <input id="low-like-enabled" type="checkbox">
+              </label>
+              <label class="field-row">
+                <span>点赞数不高于</span>
+                <input id="max-low-like" type="number" min="0" max="1000000">
+              </label>
+              <label class="field-row">
+                <span>最新评论宽限（小时）</span>
+                <input id="grace-hours" type="number" min="0" max="720">
+              </label>
+              <label class="control-row">
+                <span><strong>启用低等级信号</strong></span>
+                <input id="min-level-enabled" type="checkbox">
+              </label>
+              <label class="field-row">
+                <span>等级低于</span>
+                <input id="min-level" type="number" min="0" max="6">
+              </label>
+            </div>
+          </div>
+
+          <div class="card category-card">
+            <h3>内置内容类别</h3>
+            <p class="help">轻度、标准、严格模式使用预设组合；以下开关在“自定义”模式中生效。</p>
+            <div class="category-grid">
+              <label><input type="checkbox" data-category="insult"> 辱骂与人身攻击</label>
+              <label><input type="checkbox" data-category="sexualInnuendo"> 明显性暗示</label>
+              <label><input type="checkbox" data-category="sexualObjectification"> 性物化内容</label>
+              <label><input type="checkbox" data-category="sexualShaming"> 性或关系羞辱</label>
+              <label><input type="checkbox" data-category="provocation"> 引战与挑衅</label>
+              <label><input type="checkbox" data-category="spam"> 广告与引流</label>
+              <label><input type="checkbox" data-category="lowInformation"> 低信息量/符号刷屏</label>
+            </div>
+          </div>
+        </section>
+
+        <section id="videos" class="settings-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">页面展示</p>
+              <h2>视频与弹幕</h2>
+              <p>首页和搜索页命中卡片都会静默隐藏，并由 B 站原生网格或列表自动回流。</p>
+            </div>
+          </div>
+          <div class="two-column">
+            <div class="card control-list">
+              <h3>视频卡片</h3>
+              <label class="control-row">
+                <span><strong>首页过滤</strong></span>
+                <input id="home-videos" type="checkbox">
+              </label>
+              <label class="control-row">
+                <span><strong>搜索页过滤</strong></span>
+                <input id="search-videos" type="checkbox">
+              </label>
+              <label class="control-row">
+                <span><strong>屏蔽低播放量视频</strong></span>
+                <input id="low-view-enabled" type="checkbox">
+              </label>
+              <label class="field-row">
+                <span>播放量低于</span>
+                <input id="min-view-count" type="number" min="0" max="10000000000">
+              </label>
+              <label class="control-row">
+                <span><strong>屏蔽短视频</strong></span>
+                <input id="short-duration-enabled" type="checkbox">
+              </label>
+              <label class="field-row">
+                <span>时长短于（秒）</span>
+                <input id="min-duration-seconds" type="number" min="0" max="86400">
+              </label>
+              <p class="muted-copy">命中视频不会显示标题、原因、数量或“已折叠”提示；需要排查误伤时，可从扩展弹窗恢复本页内容。</p>
+            </div>
+            <div class="card control-list">
+              <h3>弹幕</h3>
+              <label class="control-row">
+                <span><strong>进入视频时默认关闭</strong><small>只操作当前播放器，不修改账号设置</small></span>
+                <input id="danmaku-off" type="checkbox">
+              </label>
+              <label class="control-row">
+                <span><strong>允许本视频手动开启</strong><small>进入下一个视频后重新关闭</small></span>
+                <input id="danmaku-manual" type="checkbox">
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section id="rules" class="settings-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">可解释过滤</p>
+              <h2>关键词规则</h2>
+              <p>规则可用于评论、视频标题或作者，并限定页面作用域。</p>
+            </div>
+          </div>
+          <form id="rule-form" class="card rule-form">
+            <input id="rule-id" type="hidden">
+            <div class="form-grid">
+              <label>规则名称<input id="rule-name" type="text" maxlength="100" placeholder="例如：屏蔽某个话题"></label>
+              <label>匹配内容<input id="rule-pattern" type="text" maxlength="500" required placeholder="输入关键词或正则"></label>
+              <label>目标
+                <select id="rule-target">
+                  <option value="comment">评论正文</option>
+                  <option value="video-title">视频标题</option>
+                  <option value="author">作者/UP 主</option>
+                </select>
+              </label>
+              <label>匹配方式
+                <select id="rule-matcher">
+                  <option value="contains">包含</option>
+                  <option value="whole-word">完整词</option>
+                  <option value="prefix">前缀</option>
+                  <option value="suffix">后缀</option>
+                  <option value="regex">正则</option>
+                </select>
+              </label>
+              <label>动作
+                <select id="rule-action">
+                  <option value="collapse">折叠</option>
+                  <option value="blur">模糊</option>
+                  <option value="hide">隐藏</option>
+                </select>
+              </label>
+              <label>优先级<input id="rule-priority" type="number" min="-10000" max="10000" value="100"></label>
+            </div>
+            <fieldset>
+              <legend>作用页面</legend>
+              <div class="scope-grid">
+                <label><input type="checkbox" data-scope="video" checked> 视频页</label>
+                <label><input type="checkbox" data-scope="home" checked> 首页</label>
+                <label><input type="checkbox" data-scope="search" checked> 搜索页</label>
+                <label><input type="checkbox" data-scope="dynamic"> 动态页（后续）</label>
+                <label><input type="checkbox" data-scope="space"> 空间页（后续）</label>
+              </div>
+            </fieldset>
+            <label class="inline-check"><input id="rule-case-sensitive" type="checkbox"> 区分英文字母大小写</label>
+            <p id="rule-error" class="form-error" role="alert"></p>
+            <div class="form-actions">
+              <button type="submit" class="primary-button">保存规则</button>
+              <button id="cancel-edit" type="button" class="secondary-button">取消编辑</button>
+            </div>
+          </form>
+          <div id="rule-list" class="rule-list" aria-live="polite"></div>
+        </section>
+
+        <section id="lists" class="settings-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">按行填写 ID 或昵称</p>
+              <h2>用户名单</h2>
+              <p>优先匹配数字 ID；昵称只在页面无法读取 ID 时作为回退。</p>
+            </div>
+          </div>
+          <div class="two-column">
+            <label class="card textarea-card">评论用户黑名单
+              <textarea id="blocked-users" rows="8" placeholder="每行一个用户 ID 或昵称"></textarea>
+            </label>
+            <label class="card textarea-card">评论用户白名单
+              <textarea id="allowed-users" rows="8" placeholder="每行一个用户 ID 或昵称"></textarea>
+            </label>
+            <label class="card textarea-card">UP 主黑名单
+              <textarea id="blocked-uploaders" rows="8" placeholder="每行一个用户 ID 或昵称"></textarea>
+            </label>
+            <label class="card textarea-card">UP 主白名单
+              <textarea id="allowed-uploaders" rows="8" placeholder="每行一个用户 ID 或昵称"></textarea>
+            </label>
+          </div>
+          <button id="save-lists" type="button" class="primary-button">保存名单</button>
+        </section>
+
+        <section id="data" class="settings-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">可迁移、可清除</p>
+              <h2>数据与隐私</h2>
+              <p>扩展不读取密码，不导出 Cookie，不上传评论、图片或浏览记录。</p>
+            </div>
+          </div>
+          <div class="two-column">
+            <div class="card data-card">
+              <h3>备份设置</h3>
+              <p>导出规则、阈值与名单为 UTF-8 JSON 文件。</p>
+              <button id="export-button" type="button" class="secondary-button">导出 JSON</button>
+            </div>
+            <div class="card data-card">
+              <h3>恢复设置</h3>
+              <p>无效文件不会覆盖当前有效数据。</p>
+              <label class="file-button">选择 JSON<input id="import-file" type="file" accept="application/json,.json"></label>
+            </div>
+          </div>
+          <div class="card control-list">
+            <label class="control-row">
+              <span><strong>本地数量统计</strong><small>默认开启；只累计屏蔽数量，不保存内容</small></span>
+              <input id="local-stats" type="checkbox">
+            </label>
+            <label class="control-row">
+              <span><strong>本地诊断信息</strong><small>仅用于页面适配排查，不自动上传</small></span>
+              <input id="diagnostics" type="checkbox">
+            </label>
+          </div>
+          <div class="danger-zone">
+            <div><strong>恢复默认设置</strong><p>会清除全部自定义规则、名单与累计统计。</p></div>
+            <button id="reset-button" type="button">恢复默认</button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script src="index.js"></script>
+  </body>
+</html>
