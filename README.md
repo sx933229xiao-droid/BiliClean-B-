@@ -313,8 +313,6 @@ Bilibili 及其相关名称、商标和服务归其 respective owners 所有。
 
 ## 📄 License
 
-## 📄 License
-
 BiliClean is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
 
 See [LICENSE](./LICENSE) for details.
