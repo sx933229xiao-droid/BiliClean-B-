@@ -1,0 +1,22 @@
+{
+  "name": "biliclean",
+  "version": "0.1.4",
+  "private": true,
+  "type": "module",
+  "description": "BiliClean - 哔哩净屏：本地运行的 Chromium MV3 内容净化扩展",
+  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sx933229xiao-droid/BiliClean-B-.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "test": "node --test",
+    "build": "node scripts/build.mjs && node scripts/verify-dist.mjs",
+    "verify": "npm run check && npm test && npm run build",
+    "package": "npm run build && node scripts/package.mjs"
+  }
+}

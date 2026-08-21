@@ -232,8 +232,6 @@
               </label>
               <label>动作
                 <select id="rule-action">
-                  <option value="collapse">折叠</option>
-                  <option value="blur">模糊</option>
                   <option value="hide">隐藏</option>
                 </select>
               </label>
@@ -309,8 +307,8 @@
               <span><strong>本地数量统计</strong><small>默认开启；只累计屏蔽数量，不保存内容</small></span>
               <input id="local-stats" type="checkbox">
             </label>
-            <label class="control-row">
-              <span><strong>本地诊断信息</strong><small>仅用于页面适配排查，不自动上传</small></span>
+            <label class="control-row" style="display:none">
+              <span><strong>本地诊断信息</strong><small>仅用于页面适配排查，不自动上传（v0.1.5 暂未实现，仅保留开关兼容）</small></span>
               <input id="diagnostics" type="checkbox">
             </label>
           </div>

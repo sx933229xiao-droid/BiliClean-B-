@@ -1,0 +1,8 @@
+node_modules/
+coverage/
+release/
+dist/
+*.zip
+.opencode/node_modules/
+*.log
+.DS_Store
