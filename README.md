@@ -69,18 +69,6 @@ dist/                        构建后的可加载扩展
 - 设置、规则、名单和累计数量只保存到 `chrome.storage.local`；
 - 不包含远程代码、遥测、广告 SDK 或服务器端服务。
 
-恢复工作没有顺带修改已知业务问题，以避免未经实机回归就改变发布版行为。后续开发请先阅读 [已知问题](docs/KNOWN_ISSUES.md) 和 [AI 项目交接文档](docs/AI_PROJECT_CONTEXT.md)。
-
-## 恢复说明
-
-恢复基线安装包 SHA-256：
-
-```text
-62a546d9627e03b6398277a7b0a6540fadaf43c66620f576b111d239e22455eb
-```
-
-原始 TypeScript 类型、源映射和原构建配置不在发布包中，因此无法逐字恢复。当前工程把可确认的 24 个原模块恢复为标准 ESM JavaScript，并重新建立显式依赖关系。运行逻辑来自发布包，构建结果不保证与旧产物逐字节一致。详情见 [恢复报告](docs/RECOVERY_REPORT.md)。
-
 ## 许可证
 
 GNU General Public License v3.0 only。详见 `LICENSE`。
