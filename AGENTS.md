@@ -118,3 +118,26 @@ npm run package     # 生成 release/*.zip 并记录 SHA-256
 - **产物红线**：`git diff --check` 与 `git diff --cached --check` 均必须 `EXIT 0`（后者在选择性 staging 完成后新增）；绝不 `add`/`commit` `dist/`、`*.zip`、`release/`、`node_modules/`、`.opencode/node_modules`、`.opencode/package.json|lock` 及 `.env`/`*.pem`/`*.key` 等敏感文件；仅 `git add` 源码/配置/文档/测试等受控文件，禁止 `git add -A/.`。
 - **双审批（由 `permission.bash` 触发）**：按 `.opencode/commands/ship.md` 输出提交预览（目标版本/修改文件/测试结果/diff stat/推荐 `release: v<version>`），随后实际执行 `git commit -m "release: v<version>"` 时触发第一次 `ask` 审批，执行 `git push origin main` 时触发第二次独立 `ask` 审批；`commit` 批准不视为 `push` 批准，`--force/-f/--force-with-lease` 永久 `deny`。
 - **收尾**：经用户批准后 `/ship` 最终会执行 `git push origin main`；`push` 后 `git rev-list --left-right --count origin/main...HEAD` 必须 `0 0`；不自动 `tag`/`GitHub Release`，以后单独扩展。
+
+---
+
+## 10. 多智能体开发工作流 `/dev`（单写入 coordinator 架构）
+
+> 目标：修复旧 `/dev` 在阶段 C→D 因空 `Task` payload 导致 `implementer` 未启动、E/F 未执行的编排可靠性问题，改为更稳健的“单写入 coordinator”架构。
+
+- **总览**：`/dev → coordinator → explore + reviewer + tester 并行调查 → coordinator 汇总结论 → coordinator 自己实现最小修改 → reviewer + tester 并行最终验收 → coordinator 最终报告`
+- **入口**：OpenCode Desktop 中执行 `/dev <任务描述>`（见 `.opencode/commands/dev.md`），由 `dev-coordinator`（`mode: primary`）总协调。
+- **唯一写入者**：`dev-coordinator` 为本工作流唯一允许修改业务代码的 Agent（`edit: allow`）；`implementer.md` 暂时保留但 `/dev` 不再依赖、不再自动调用，仅供手工 `@implementer` 或其他工作流使用。
+- **权限**：
+  - `permission.task` 白名单：`"*": deny`，仅 `explore` / `scout` / `reviewer` / `tester` 为 `allow`，已移除 `implementer`，禁止 `release`；如果项目全局规则更严格则保留更严格规则。
+  - `permission.bash` 严格最小权限：仅 `git status*` / `git diff*` / `git log*` / `git show*` / `git grep*` / `npm run check*` / `npm test*` / `npm run test*` / `npm run build*` / `npm run verify*` 为 `allow`，其余 `*` 为 `ask`，`git add*` / `git commit*` / `git tag*` / `git push*` / `git reset --hard*` / `git clean*` / `npm publish*` / 所有 `force push`（`--force`/`-f`/`--force-with-lease` 变体）为 `deny`。
+  - `permission.edit: allow` 仅对 `dev-coordinator` 开放，使其成为 `/dev` 唯一可改 `src/`/`public/` 的 Agent；`reviewer`/`tester` 保持 `edit: deny` 只读。
+- **阶段**：
+  1. **A 前置检查**：读 `AGENTS.md`、看 `git status --short/diff`、记录版本基线、禁止丢失无关脏修改。
+  2. **B 并行调查**：尽可能同一轮并行启动 `explore` + `reviewer` + `tester`（必要时 + `scout`），相互独立不污染结论。
+  3. **C 汇总结论**：由 coordinator 亲自汇总，必须得到 6 项（可复现链路、根因、最小修复方案、修改范围、回归风险、测试方案）后才允许 `edit`；禁止边猜边改。
+  4. **D 实现**：由 coordinator 自己做最小 diff；不扩大需求、不改版本号、不改 `release`/`package` 发布流程、不动与本任务无关的脏工作区文件。
+  5. **E 并行验收**：再次并行调用 `reviewer`（只读审查最终 diff）与 `tester`（必须真正执行 `npm run verify`，不得静态推断通过）；若 `tester` 失败或 `reviewer` 有 blocker，由 coordinator 自己修复后重跑 `reviewer + tester`，最多 2 次修复循环。
+  6. **F 结束**：绝不自动 `commit`/`push`/`tag`/`release`/`ship`，只输出结构化报告并明确区分【机器已验证】与【仍需浏览器人工验证】。
+- **Task 安全**：每次 `Task` 调用前必须明确生成非空 `description` + `prompt` + `subagent_type`，禁止空 payload；单 Agent 失败必须明示失败 Agent，不得伪造 `completed`。
+- **报告真实性**：`tester` 只有真正获得命令执行输出才允许写“`npm run verify` 已通过”“`node --test` 已执行”；静态读取只能写“静态分析认为……”。
