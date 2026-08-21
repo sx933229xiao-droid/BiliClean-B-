@@ -48,6 +48,13 @@
       "git show*": "allow",
       "git grep*": "allow",
       "git branch*": "allow",
+      "git add*": "allow",
+      "git rev-parse*": "allow",
+      "git rev-list*": "allow",
+      "git ls-remote*": "allow",
+      "git fetch origin*": "allow",
+      "git remote -v*": "allow",
+      "git remote get-url*": "allow",
 
       "npm run verify*": "allow",
       "npm run check*": "allow",
@@ -62,9 +69,16 @@
       "node scripts/verify-dist.mjs*": "allow",
 
       "git commit*": "ask",
+      "git tag*": "ask",
+      "git push*": "ask",
 
-      "git push*": "deny",
-      "git push --*": "deny",
+      // 规则优先级：普通 push 为 ask，force push 必须覆盖为 deny（last matching rule wins）
+      "git push --force*": "deny",
+      "git push *--force*": "deny",
+      "git push -f*": "deny",
+      "git push * -f*": "deny",
+      "git push --force-with-lease*": "deny",
+      "git push *--force-with-lease*": "deny",
       "git reset --hard*": "deny",
       "git clean*": "deny",
       "git clean -*": "deny",

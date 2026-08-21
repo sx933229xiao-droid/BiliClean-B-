@@ -20,6 +20,8 @@ Plan → Build → /verify → /review → /release
 - **/review**：只读审查，挑问题不改代码。
 - **/release**：准备发布材料，任何文件改动都要用户点头。
 
+> **分支**：开发流 `修改 → /verify → /review → 人工浏览器测试`（见 §5 与 `docs/AI_PROJECT_CONTEXT.md` T01-T20）；发布流单独走 `/ship <version>`（如 `/ship 0.1.5`）—— 版本检查 → 双轮 `npm run verify` → 双审批 `commit` → `push` 到 `origin/main`。`git commit` 与 `git push origin main` 为两个独立审批点，commit 审批不视为 push 审批；`--force/-f` 等强制推送永久禁止。
+
 本轮任务只建立工作流配置，不改插件业务代码。
 
 ---
@@ -41,14 +43,14 @@ Plan → Build → /verify → /review → /release
 
 | 角色 | 能做什么 | 不能做什么 |
 | --- | --- | --- |
-| **Build（主开发）** | 读写 `src/`、`public/`、`scripts/`、文档 | 禁止 `git push`、`git reset --hard`、`git clean`、`npm publish` |
+| **Build（主开发）** | 读写 `src/`、`public/`、`scripts/`、文档 | 禁止 `git push --force/-f`、`git reset --hard`、`git clean`、`npm publish`；`git commit`/`tag`/`push` 需用户审批（见 §9） |
 | **reviewer（只读审查）** | 读代码、跑 `git status/diff/log` 等只读命令，输出问题清单 | 绝不修改源码文件 |
 | **tester（只读验证）** | 只读 + 运行 `npm run verify`/`check`/`test`/`build` 等验证命令 | 绝不修改源码文件 |
 | **release（发布准备）** | 起草 `CHANGELOG`、核对版本号、校验 `dist/`、打包预览 | 任何写文件前必须经用户审批；同样禁止 push/publish 等危险命令 |
 
-所有角色：禁止读取 `.env`、`.env.*`、`*.pem`、`*.key` 等可能含密钥的文件；访问项目外目录必须先 `ask`；`git push` / `git reset --hard` / `git clean` / `npm publish` 永久禁止。
+所有角色：禁止读取 `.env`、`.env.*`、`*.pem`、`*.key` 等可能含密钥的文件；访问项目外目录必须先 `ask`；`git push --force/-f` / `git reset --hard` / `git clean` / `npm publish` 永久禁止；`git commit` / `git tag` / `git push`（非强制）需用户审批且 `commit` 与 `push` 为两次独立审批。
 
-安全命令自动允许：`npm run verify`、`npm run check`、`npm test`、`npm run build`、`npm run package`、`node --test`、`git status`、`git diff`、`git log`、`git show` 等。
+安全命令自动允许：`npm run verify`、`npm run check`、`npm test`、`npm run build`、`npm run package`、`node --test`、`git status`/`diff`/`log`/`show`/`branch`/`add`/`rev-parse`/`rev-list`/`ls-remote`/`fetch origin`/`remote -v`/`remote get-url` 等；详见 `opencode.jsonc` `permission.bash`（`*` 默认 `ask`，force push 以 `deny` 覆盖 `ask`）。
 
 ---
 
@@ -105,3 +107,14 @@ npm run package     # 生成 release/*.zip 并记录 SHA-256
 - 提问用户前：先用一句普通中文说清“改完后用户在 B 站会看到什么不同”，再给出选项。
 - 报告问题时：文件路径用 `path:line` 形式，如 `src/content/renderers/filter-renderer.js:42`。
 - 涉及选择器或页面结构：保存脱敏 DOM 片段，不保存真实用户名/评论内容。
+
+---
+
+## 9. 发布工作流 `/ship <version>`（本地 Git 发布）
+
+- **入口**：OpenCode Desktop 中执行 `/ship 0.1.5`（见 `.opencode/commands/ship.md` 21 步完整流程），版本参数来源于 OpenCode 官方占位 `$1`，严格匹配 `^\d+\.\d+\.\d+$`。
+- **前置**：必须在 `main` 分支、`origin/main` 存在；**发布开始前执行 `git fetch origin` + `git rev-list --left-right --count origin/main...HEAD` 必须严格为 `0 0`**，本地 ahead/behind/分叉任一非 0 均立即停止，不自动 `merge`/`rebase`/`reset`/`pull`/`force push`，确保不顺带推送历史遗留 commit。
+- **版本权威**：至少 `package.json` 与 `public/manifest.json` 版本一致；若有其他权威位置一并核对；改版前后各执行一次 `npm run verify`（`check + test + build + verify-dist`），任一步失败即停。
+- **产物红线**：`git diff --check` 与 `git diff --cached --check` 均必须 `EXIT 0`（后者在选择性 staging 完成后新增）；绝不 `add`/`commit` `dist/`、`*.zip`、`release/`、`node_modules/`、`.opencode/node_modules`、`.opencode/package.json|lock` 及 `.env`/`*.pem`/`*.key` 等敏感文件；仅 `git add` 源码/配置/文档/测试等受控文件，禁止 `git add -A/.`。
+- **双审批（由 `permission.bash` 触发）**：按 `.opencode/commands/ship.md` 输出提交预览（目标版本/修改文件/测试结果/diff stat/推荐 `release: v<version>`），随后实际执行 `git commit -m "release: v<version>"` 时触发第一次 `ask` 审批，执行 `git push origin main` 时触发第二次独立 `ask` 审批；`commit` 批准不视为 `push` 批准，`--force/-f/--force-with-lease` 永久 `deny`。
+- **收尾**：经用户批准后 `/ship` 最终会执行 `git push origin main`；`push` 后 `git rev-list --left-right --count origin/main...HEAD` 必须 `0 0`；不自动 `tag`/`GitHub Release`，以后单独扩展。
