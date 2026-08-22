@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "BiliClean - 哔哩净屏",
   "short_name": "BiliClean",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "minimum_chrome_version": "120",
   "description": "在本地静默隐藏哔哩哔哩网页中的干扰性评论、视频卡片，并默认关闭弹幕。",
   "permissions": [

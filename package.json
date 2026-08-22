@@ -1,6 +1,6 @@
 {
   "name": "biliclean",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "type": "module",
   "description": "BiliClean - 哔哩净屏：本地运行的 Chromium MV3 内容净化扩展",
